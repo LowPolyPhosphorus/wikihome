@@ -34,7 +34,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto sign in after registration
       const signInResult = await signIn("credentials", {
         email,
         password,
@@ -53,115 +52,137 @@ export default function RegisterPage() {
     }
   }
 
-  const inputClass =
-    "w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#475569]";
-  const labelClass = "block text-sm font-medium text-[#111827] mb-1";
+  const inputStyle = {
+    width: "100%",
+    padding: "6px 8px",
+    border: "1px solid #a2a9b1",
+    fontSize: "0.875em",
+    color: "#202122",
+    backgroundColor: "#fff",
+    boxSizing: "border-box" as const,
+  };
+
+  const labelStyle = {
+    display: "block",
+    fontSize: "0.875em",
+    color: "#202122",
+    marginBottom: "4px",
+  };
+
+  const errorStyle = {
+    fontSize: "0.8em",
+    color: "#d33",
+    marginTop: "3px",
+  };
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="border border-[#e2e8f0] rounded-lg bg-white p-8">
-          <h1 className="text-2xl font-semibold text-[#111827] mb-2">
-            Create your account
+    <div style={{ backgroundColor: "#fff", minHeight: "100vh", fontFamily: "Linux Libertine, Georgia, Times, serif" }}>
+      {/* Top bar */}
+      <div style={{ borderBottom: "1px solid #a2a9b1", padding: "8px 20px", backgroundColor: "#fff" }}>
+        <span style={{ fontFamily: "Linux Libertine, Georgia, serif", fontSize: "1.2em", color: "#202122" }}>
+          WikiHome
+        </span>
+      </div>
+
+      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "24px 20px", display: "flex", gap: "40px" }}>
+        {/* Left: Form */}
+        <div style={{ flex: "0 0 360px" }}>
+          <h1 style={{ fontFamily: "Linux Libertine, Georgia, serif", fontSize: "1.95em", fontWeight: "normal", borderBottom: "1px solid #a2a9b1", paddingBottom: "4px", marginBottom: "16px", color: "#202122" }}>
+            Create account
           </h1>
-          <p className="text-sm text-[#475569] mb-6">
-            Start documenting your home.
-          </p>
 
           {errors.form && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
+            <div style={{ border: "1px solid #d33", backgroundColor: "#fee7e6", padding: "8px 12px", marginBottom: "12px", fontSize: "0.875em", color: "#202122" }}>
               {errors.form}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className={labelClass}>
-                Name
-              </label>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "12px" }}>
+              <label htmlFor="name" style={labelStyle}>Your name</label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-                placeholder="Your name"
+                style={inputStyle}
+                autoComplete="name"
               />
-              {errors.name && (
-                <p className="mt-1 text-xs text-red-600">{errors.name}</p>
-              )}
+              {errors.name && <p style={errorStyle}>{errors.name}</p>}
             </div>
 
-            <div>
-              <label htmlFor="email" className={labelClass}>
-                Email
-              </label>
+            <div style={{ marginBottom: "12px" }}>
+              <label htmlFor="email" style={labelStyle}>Email address</label>
               <input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-                placeholder="you@example.com"
+                style={inputStyle}
+                autoComplete="email"
               />
-              {errors.email && (
-                <p className="mt-1 text-xs text-red-600">{errors.email}</p>
-              )}
+              {errors.email && <p style={errorStyle}>{errors.email}</p>}
             </div>
 
-            <div>
-              <label htmlFor="password" className={labelClass}>
-                Password
-              </label>
+            <div style={{ marginBottom: "12px" }}>
+              <label htmlFor="password" style={labelStyle}>Password</label>
+              <p style={{ fontSize: "0.8em", color: "#54595d", marginBottom: "4px" }}>
+                Use at least 8 characters.
+              </p>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={inputClass}
-                placeholder="At least 8 characters"
+                style={inputStyle}
+                autoComplete="new-password"
               />
-              {errors.password && (
-                <p className="mt-1 text-xs text-red-600">{errors.password}</p>
-              )}
+              {errors.password && <p style={errorStyle}>{errors.password}</p>}
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className={labelClass}>
-                Confirm Password
-              </label>
+            <div style={{ marginBottom: "16px" }}>
+              <label htmlFor="confirmPassword" style={labelStyle}>Confirm password</label>
               <input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-                placeholder="Repeat your password"
+                style={inputStyle}
+                autoComplete="new-password"
               />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-600">
-                  {errors.confirmPassword}
-                </p>
-              )}
+              {errors.confirmPassword && <p style={errorStyle}>{errors.confirmPassword}</p>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] disabled:opacity-50 transition-colors"
+              style={{ padding: "6px 16px", backgroundColor: "#f8f9fa", border: "1px solid #a2a9b1", color: "#202122", fontSize: "0.875em", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.6 : 1 }}
             >
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? "Creating account..." : "Create your account"}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-center text-[#475569]">
+          <p style={{ marginTop: "16px", fontSize: "0.875em", color: "#202122" }}>
             Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-[#475569] underline hover:text-[#334155]"
-            >
-              Sign in
+            <Link href="/login" style={{ color: "#3366cc" }}>
+              Log in
             </Link>
+          </p>
+        </div>
+
+        {/* Right: Info panel */}
+        <div style={{ flex: 1, borderLeft: "1px solid #a2a9b1", paddingLeft: "40px", paddingTop: "8px" }}>
+          <p style={{ fontSize: "1em", color: "#202122", fontWeight: "bold", marginBottom: "16px" }}>
+            WikiHome is made for people like you.
+          </p>
+          <p style={{ fontSize: "0.875em", color: "#202122", lineHeight: "1.6", marginBottom: "12px" }}>
+            Create a wiki for your home — document every room, appliance, system, and manual in one organized place.
+          </p>
+          <p style={{ fontSize: "0.875em", color: "#202122", lineHeight: "1.6", marginBottom: "12px" }}>
+            Upload images and PDFs and let AI turn them into structured wiki pages automatically.
+          </p>
+          <p style={{ fontSize: "0.875em", color: "#202122", lineHeight: "1.6" }}>
+            Share with family members or keep it private. Your home, documented.
           </p>
         </div>
       </div>
