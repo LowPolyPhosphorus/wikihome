@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  homes         HomeMember[]
+  ownedHomes    Home[]    @relation("HomeOwner")
+  pageEdits     PageVersion[]
+  notes         PageNote[]
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Home {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  ownerId       String
+  owner         User      @relation("HomeOwner", fields: [ownerId], references: [id])
+  isPublic      Boolean   @default(false)
+  homeType      String    @default("owned")
+  floors        Int       @default(1)
+  hasBasement   Boolean   @default(false)
+  hasAttic      Boolean   @default(false)
+  hasGarage     Boolean   @default(false)
+  garageSize    Int       @default(0)
+  hasBackyard   Boolean   @default(false)
+  hasPool       Boolean   @default(false)
+  hasHotTub     Boolean   @default(false)
+  hasGuestHouse Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  members       HomeMember[]
+  pages         Page[]
+  categories    Category[]
+}
+
+model HomeMember {
+  id        String   @id @default(cuid())
+  homeId    String
+  userId    String
+  role      String   @default("viewer")
+  joinedAt  DateTime @default(now())
+  home      Home     @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([homeId, userId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  homeId    String
+  home      Home     @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  pages     Page[]
+
+  @@unique([homeId, name])
+}
+
+model Page {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String
+  content       String    @default("")
+  homeId        String
+  categoryId    String?
+  status        String    @default("stub")
+  hasReminder   Boolean   @default(false)
+  reminderDate  DateTime?
+  reminderNote  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  home          Home      @relation(fields: [homeId], references: [id], onDelete: Cascade)
+  category      Category? @relation(fields: [categoryId], references: [id])
+  versions      PageVersion[]
+  notes         PageNote[]
+  linksFrom     PageLink[] @relation("LinkFrom")
+  linksTo       PageLink[] @relation("LinkTo")
+  attachments   Attachment[]
+
+  @@unique([homeId, slug])
+}
+
+model PageVersion {
+  id            String   @id @default(cuid())
+  pageId        String
+  content       String
+  editedById    String
+  editSummary   String?
+  isAiGenerated Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  page          Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  editedBy      User     @relation(fields: [editedById], references: [id])
+}
+
+model PageNote {
+  id        String   @id @default(cuid())
+  pageId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model PageLink {
+  id         String @id @default(cuid())
+  fromPageId String
+  toPageId   String
+  fromPage   Page   @relation("LinkFrom", fields: [fromPageId], references: [id], onDelete: Cascade)
+  toPage     Page   @relation("LinkTo", fields: [toPageId], references: [id], onDelete: Cascade)
+
+  @@unique([fromPageId, toPageId])
+}
+
+model Attachment {
+  id            String   @id @default(cuid())
+  pageId        String
+  filename      String
+  fileType      String
+  extractedText String?
+  storageUrl    String?
+  deletedAt     DateTime?
+  createdAt     DateTime @default(now())
+  page          Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
