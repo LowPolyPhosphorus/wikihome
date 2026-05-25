@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { HomeNav } from "@/components/ui/HomeNav";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -29,10 +28,12 @@ export default function SetupPage() {
   // Step 3: Type
   const [homeType, setHomeType] = useState("owned");
 
+  // Step 4: Review (no state needed, data is derived)
+
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-[#f9fafb] flex items-center justify-center">
-        <p className="text-[#475569]">Loading...</p>
+      <div style={{ minHeight: "100vh", backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -80,80 +81,108 @@ export default function SetupPage() {
     router.push(data.redirectUrl);
   }
 
-  const inputClass =
-    "w-full px-3 py-2 border border-[#e2e8f0] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#475569]";
-  const labelClass = "block text-sm font-medium text-[#111827] mb-1";
-  const radioLabelClass =
-    "flex items-center gap-2 px-3 py-2 border border-[#e2e8f0] rounded-md cursor-pointer hover:border-[#475569] text-sm text-[#111827]";
+  const styles = {
+    fontFamily: '"Linux Libertine", Georgia, Times, serif',
+    color: "#202122",
+  };
+
+  const topBarStyle = {
+    borderBottom: "1px solid #a2a9b1",
+    padding: "8px 20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  } as const;
+
+  const inputStyle = {
+    backgroundColor: "#fff",
+    border: "1px solid #a2a9b1",
+    padding: "6px 8px",
+    fontSize: "0.875em",
+    color: "#202122",
+    width: "100%",
+  } as const;
+
+  const labelStyle = {
+    display: "block",
+    fontSize: "0.875em",
+    fontWeight: 500,
+    color: "#202122",
+    marginBottom: 4,
+  } as const;
+
+  const buttonStyle = {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #a2a9b1",
+    color: "#202122",
+    padding: "6px 16px",
+    cursor: "pointer",
+  } as const;
+
+  const checkLabelStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "4px 0",
+    cursor: "pointer",
+  } as const;
 
   return (
-    <div className="min-h-screen bg-[#f9fafb]">
-      <HomeNav email={session?.user?.email ?? ""} />
+    <div style={{ minHeight: "100vh", backgroundColor: "#fff" }}>
+      {/* Top bar */}
+      <div style={topBarStyle}>
+        <span style={{ fontWeight: 600 }}>WikiHome</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: "0.875em" }}>{session?.user?.email ?? ""}</span>
+          <form action="/api/auth/signout" method="POST">
+            <button type="submit" style={buttonStyle}>
+              Sign Out
+            </button>
+          </form>
+        </div>
+      </div>
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        {/* Progress bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            {["Name", "Features", "Type", "Review"].map((label, i) => (
-              <div
-                key={label}
-                className={`text-xs font-medium ${
-                  i + 1 <= step ? "text-[#475569]" : "text-[#e2e8f0]"
-                }`}
-              >
-                {label}
-              </div>
-            ))}
-          </div>
-          <div className="h-1.5 bg-[#e2e8f0] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#475569] rounded-full transition-all duration-300"
-              style={{ width: `${(step / 4) * 100}%` }}
-            />
-          </div>
+      <main style={{ maxWidth: 640, margin: "0 auto", padding: 32 }}>
+        {/* Step indicator (plain text, no progress bar) */}
+        <div style={{ marginBottom: 24 }}>
+          <span>
+            Step {step} of 4 —{" "}
+            {["Name your home", "What does your home have?", "What type of home is this?", "Review and create"][step - 1]}
+          </span>
         </div>
 
         {/* Error display */}
         {errors.form && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
+          <div style={{ marginBottom: 16, padding: 8, backgroundColor: "#fff", border: "1px solid #a2a9b1", fontSize: "0.875em" }}>
             {errors.form}
           </div>
         )}
 
         {/* Step 1: Name */}
         {step === 1 && (
-          <div className="border border-[#e2e8f0] rounded-lg bg-white p-8">
-            <h2 className="text-xl font-semibold text-[#111827] mb-6">
-              Name your home
-            </h2>
-            <div className="mb-4">
-              <label htmlFor="name" className={labelClass}>
-                Home name
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-                placeholder='e.g. "Main House", "Mountain Cabin"'
-                autoFocus
-              />
-              {slug && (
-                <p className="mt-1 text-xs text-[#475569]">
-                  URL: /wiki/you/{slug}
-                </p>
-              )}
-              {errors.name && (
-                <p className="mt-1 text-xs text-red-600">{errors.name}</p>
-              )}
-            </div>
-            <div className="flex justify-end">
-              <button
-                onClick={() => setStep(2)}
-                disabled={!name.trim()}
-                className="px-6 py-2 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] disabled:opacity-50 transition-colors"
-              >
+          <div>
+            <label htmlFor="name" style={labelStyle}>
+              Home name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={inputStyle}
+              placeholder='e.g. "Main House", "Mountain Cabin"'
+              autoFocus
+            />
+            {slug && (
+              <p style={{ fontSize: "0.75em", color: "#54595d", marginTop: 4 }}>
+                URL: /wiki/you/{slug}
+              </p>
+            )}
+            {errors.name && (
+              <p style={{ fontSize: "0.75em", color: "#a2a9b1" }}>{errors.name}</p>
+            )}
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => setStep(2)} disabled={!name.trim()} style={{ ...buttonStyle, opacity: !name.trim() ? 0.5 : 1 }}>
                 Next
               </button>
             </div>
@@ -162,99 +191,79 @@ export default function SetupPage() {
 
         {/* Step 2: Features */}
         {step === 2 && (
-          <div className="border border-[#e2e8f0] rounded-lg bg-white p-8">
-            <h2 className="text-xl font-semibold text-[#111827] mb-6">
+          <div>
+            <h2 style={{ fontWeight: "normal", borderBottom: "1px solid #a2a9b1", paddingBottom: 4, marginBottom: 16 }}>
               What does your home have?
             </h2>
 
-            <div className="space-y-6">
-              {/* Floors */}
-              <div>
-                <label className={labelClass}>Floors</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4].map((n) => (
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              {[1, 2, 3, 4].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setFloors(n)}
+                  style={{ ...buttonStyle, backgroundColor: floors === n ? "#a2a9b1" : "#f8f9fa" }}
+                >
+                  {n === 4 ? "4+" : n}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              {[
+                { key: "hasBasement", label: "Basement" },
+                { key: "hasAttic", label: "Attic" },
+                { key: "hasGarage", label: "Garage" },
+                { key: "hasBackyard", label: "Backyard" },
+                { key: "hasPool", label: "Pool" },
+                { key: "hasHotTub", label: "Hot Tub" },
+                { key: "hasGuestHouse", label: "Guest House / ADU" },
+              ].map(({ key, label }) => {
+                const setter = key as keyof typeof hasBasement;
+                return (
+                  <label key={key} style={checkLabelStyle}>
+                    <input
+                      type="checkbox"
+                      checked={key === "hasBasement" ? hasBasement : key === "hasAttic" ? hasAttic : key === "hasGarage" ? hasGarage : key === "hasBackyard" ? hasBackyard : key === "hasPool" ? hasPool : key === "hasHotTub" ? hasHotTub : hasGuestHouse}
+                      onChange={(e) => {
+                        if (key === "hasBasement") setHasBasement(e.target.checked);
+                        else if (key === "hasAttic") setHasAttic(e.target.checked);
+                        else if (key === "hasGarage") setHasGarage(e.target.checked);
+                        else if (key === "hasBackyard") setHasBackyard(e.target.checked);
+                        else if (key === "hasPool") setHasPool(e.target.checked);
+                        else if (key === "hasHotTub") setHasHotTub(e.target.checked);
+                        else setHasGuestHouse(e.target.checked);
+                      }}
+                    />
+                    {label}
+                  </label>
+                );
+              })}
+            </div>
+
+            {hasGarage && (
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Garage size</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[1, 2].map((s) => (
                     <button
-                      key={n}
+                      key={s}
                       type="button"
-                      onClick={() => setFloors(n)}
-                      className={`px-4 py-2 rounded-md text-sm border transition-colors ${
-                        floors === n
-                          ? "bg-[#475569] text-white border-[#475569]"
-                          : "border-[#e2e8f0] text-[#111827] hover:border-[#475569]"
-                      }`}
+                      onClick={() => setGarageSize(s)}
+                      style={{ ...buttonStyle, backgroundColor: garageSize === s ? "#a2a9b1" : "#f8f9fa" }}
                     >
-                      {n === 4 ? "4+" : n}
+                      {s === 2 ? "Double" : "Single"}
                     </button>
                   ))}
                 </div>
               </div>
+            )}
 
-              {/* Checkboxes */}
-              <div className="space-y-3">
-                {[
-                  { key: "hasBasement", label: "Basement", value: hasBasement, set: setHasBasement },
-                  { key: "hasAttic", label: "Attic", value: hasAttic, set: setHasAttic },
-                  { key: "hasGarage", label: "Garage", value: hasGarage, set: setHasGarage },
-                  { key: "hasBackyard", label: "Backyard", value: hasBackyard, set: setHasBackyard },
-                  { key: "hasPool", label: "Pool", value: hasPool, set: setHasPool },
-                  { key: "hasHotTub", label: "Hot Tub", value: hasHotTub, set: setHasHotTub },
-                  { key: "hasGuestHouse", label: "Guest House / ADU", value: hasGuestHouse, set: setHasGuestHouse },
-                ].map(({ key, label, value, set }) => (
-                  <label key={key} className={radioLabelClass}>
-                    <input
-                      type="checkbox"
-                      checked={value}
-                      onChange={(e) => set(e.target.checked)}
-                      className="rounded border-[#e2e8f0] text-[#475569] focus:ring-[#475569]"
-                    />
-                    {label}
-                  </label>
-                ))}
-              </div>
-
-              {/* Garage size */}
-              {hasGarage && (
-                <div>
-                  <label className={labelClass}>Garage size</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setGarageSize(1)}
-                      className={`px-4 py-2 rounded-md text-sm border transition-colors ${
-                        garageSize === 1
-                          ? "bg-[#475569] text-white border-[#475569]"
-                          : "border-[#e2e8f0] text-[#111827] hover:border-[#475569]"
-                      }`}
-                    >
-                      Single
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGarageSize(2)}
-                      className={`px-4 py-2 rounded-md text-sm border transition-colors ${
-                        garageSize === 2
-                          ? "bg-[#475569] text-white border-[#475569]"
-                          : "border-[#e2e8f0] text-[#111827] hover:border-[#475569]"
-                      }`}
-                    >
-                      Double
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() => setStep(1)}
-                className="px-6 py-2 border border-[#e2e8f0] text-[#111827] rounded-md text-sm font-medium hover:bg-[#f9fafb] transition-colors"
-              >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={() => setStep(1)} style={buttonStyle}>
                 Back
               </button>
-              <button
-                onClick={() => setStep(3)}
-                className="px-6 py-2 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] transition-colors"
-              >
+              <button onClick={() => setStep(3)} style={buttonStyle}>
                 Next
               </button>
             </div>
@@ -263,40 +272,29 @@ export default function SetupPage() {
 
         {/* Step 3: Home type */}
         {step === 3 && (
-          <div className="border border-[#e2e8f0] rounded-lg bg-white p-8">
-            <h2 className="text-xl font-semibold text-[#111827] mb-6">
+          <div>
+            <h2 style={{ fontWeight: "normal", borderBottom: "1px solid #a2a9b1", paddingBottom: 4, marginBottom: 16 }}>
               What type of home is this?
             </h2>
-            <div className="space-y-3">
-              {[
-                { value: "owned", label: "I own this home" },
-                { value: "renting", label: "I am renting" },
-                { value: "rental", label: "Rental property (I am the landlord)" },
-              ].map((option) => (
-                <label key={option.value} className={radioLabelClass}>
-                  <input
-                    type="radio"
-                    name="homeType"
-                    value={option.value}
-                    checked={homeType === option.value}
-                    onChange={(e) => setHomeType(e.target.value)}
-                    className="text-[#475569] focus:ring-[#475569]"
-                  />
-                  {option.label}
-                </label>
-              ))}
-            </div>
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() => setStep(2)}
-                className="px-6 py-2 border border-[#e2e8f0] text-[#111827] rounded-md text-sm font-medium hover:bg-[#f9fafb] transition-colors"
-              >
+
+            {["owned", "renting", "rental"].map((type, i) => (
+              <label key={type} style={checkLabelStyle}>
+                <input
+                  type="radio"
+                  name="homeType"
+                  value={type}
+                  checked={homeType === type}
+                  onChange={(e) => setHomeType(e.target.value)}
+                />
+                {[ "I own this home", "I am renting", "Rental property (I am the landlord)"][i]}
+              </label>
+            ))}
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={() => setStep(2)} style={buttonStyle}>
                 Back
               </button>
-              <button
-                onClick={() => setStep(4)}
-                className="px-6 py-2 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] transition-colors"
-              >
+              <button onClick={() => setStep(4)} style={buttonStyle}>
                 Next
               </button>
             </div>
@@ -305,57 +303,24 @@ export default function SetupPage() {
 
         {/* Step 4: Review */}
         {step === 4 && (
-          <div className="border border-[#e2e8f0] rounded-lg bg-white p-8">
-            <h2 className="text-xl font-semibold text-[#111827] mb-6">
+          <div>
+            <h2 style={{ fontWeight: "normal", borderBottom: "1px solid #a2a9b1", paddingBottom: 4, marginBottom: 16 }}>
               Review and create
             </h2>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between py-2 border-b border-[#e2e8f0]">
-                <span className="text-[#475569]">Name</span>
-                <span className="text-[#111827] font-medium">{name}</span>
-              </div>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tbody>
+                <tr><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8 }}>Name</td><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8, fontWeight: 500 }}>{name}</td></tr>
+                <tr><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8 }}>Type</td><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8, fontWeight: 500 }}>{homeType}</td></tr>
+                <tr><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8 }}>Floors</td><td style={{ borderBottom: "1px solid #a2a9b1", padding: 8, fontWeight: 500 }}>{floors === 4 ? "4+" : floors}</td></tr>
+              </tbody>
+            </table>
 
-              <div className="flex justify-between py-2 border-b border-[#e2e8f0]">
-                <span className="text-[#475569]">Type</span>
-                <span className="text-[#111827] font-medium capitalize">{homeType}</span>
-              </div>
-
-              <div className="flex justify-between py-2 border-b border-[#e2e8f0]">
-                <span className="text-[#475569]">Floors</span>
-                <span className="text-[#111827] font-medium">{floors === 4 ? "4+" : floors}</span>
-              </div>
-
-              {[
-                { label: "Basement", value: hasBasement },
-                { label: "Attic", value: hasAttic },
-                { label: `Garage${hasGarage ? ` (${garageSize === 2 ? "Double" : "Single"})` : ""}`, value: hasGarage },
-                { label: "Backyard", value: hasBackyard },
-                { label: "Pool", value: hasPool },
-                { label: "Hot Tub", value: hasHotTub },
-                { label: "Guest House", value: hasGuestHouse },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between py-2 border-b border-[#e2e8f0]">
-                  <span className="text-[#475569]">{label}</span>
-                  <span className="text-[#111827] font-medium">
-                    {value ? "✓" : "—"}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() => setStep(3)}
-                className="px-6 py-2 border border-[#e2e8f0] text-[#111827] rounded-md text-sm font-medium hover:bg-[#f9fafb] transition-colors"
-              >
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between" }}>
+              <button onClick={() => setStep(3)} style={buttonStyle}>
                 Back
               </button>
-              <button
-                onClick={handleCreate}
-                disabled={loading}
-                className="px-6 py-2 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] disabled:opacity-50 transition-colors"
-              >
+              <button onClick={handleCreate} disabled={loading} style={{ ...buttonStyle, opacity: loading ? 0.5 : 1 }}>
                 {loading ? "Creating..." : "Create Home"}
               </button>
             </div>

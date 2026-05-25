@@ -2,7 +2,6 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { HomeNav } from "@/components/ui/HomeNav";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -28,65 +27,102 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const styles = {
+    fontFamily: '"Linux Libertine", Georgia, Times, serif',
+    color: "#202122",
+  };
+
+  const topBarStyle = {
+    borderBottom: "1px solid #a2a9b1",
+    padding: "8px 20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  } as const;
+
+  const pageHeadingStyle = {
+    fontWeight: "normal" as const,
+    borderBottom: "1px solid #a2a9b1",
+    paddingBottom: 4,
+    marginBottom: 16,
+  } as const;
+
+  const inputStyle = {
+    backgroundColor: "#fff",
+    border: "1px solid #a2a9b1",
+    padding: "6px 8px",
+    fontSize: "0.875em",
+    color: "#202122",
+    width: "100%",
+  } as const;
+
+  const buttonStyle = {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #a2a9b1",
+    color: "#202122",
+    padding: "6px 16px",
+    cursor: "pointer",
+    textDecoration: "none",
+    display: "inline-block",
+  } as const;
+
   return (
-    <div className="min-h-screen bg-[#f9fafb]">
-      <HomeNav email={session.user.email ?? ""} />
-
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold text-[#111827]">
-            Your Homes
-          </h1>
-          <Link
-            href="/setup"
-            className="inline-flex items-center px-4 py-2 bg-[#475569] text-white rounded-md text-sm font-medium hover:bg-[#334155] transition-colors"
+    <div style={{ minHeight: "100vh", backgroundColor: "#fff" }}>
+      {/* Top navigation bar */}
+      <div style={topBarStyle}>
+        <span style={{ fontWeight: 600 }}>WikiHome</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: "0.875em" }}>{userEmail}</span>
+          <form
+            action="/api/auth/signout"
+            method="POST"
+            style={{ display: "inline" }}
           >
-            + Create new home
-          </Link>
+            <button type="submit" style={buttonStyle}>
+              Sign Out
+            </button>
+          </form>
         </div>
+      </div>
 
-        {homes.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-5xl mb-4">🏠</div>
-            <h2 className="text-xl font-semibold text-[#111827] mb-2">
-              Welcome to WikiHome
-            </h2>
-            <p className="text-[#475569] mb-8 max-w-md mx-auto">
-              You don't have any homes yet. Create your first home to start
-              documenting everything about it — from appliances to room layouts.
-            </p>
-            <Link
-              href="/setup"
-              className="inline-flex items-center px-6 py-3 bg-[#475569] text-white rounded-md text-base font-medium hover:bg-[#334155] transition-colors"
-            >
-              Create your first home
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {homes.map((home) => (
-              <Link
-                key={home.id}
-                href={`/wiki/${userEmail}/${home.slug}`}
-                className="block border border-[#e2e8f0] rounded-lg bg-white p-4 hover:border-[#475569] transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-[#111827]">
-                      {home.name}
-                    </h3>
-                    <p className="text-sm text-[#475569] mt-0.5">
-                      {home._count.pages} pages · {home.homeType}
-                    </p>
-                  </div>
-                  <span className="text-[#475569] text-sm">
-                    {home.isPublic ? "Public" : "Private"}
-                  </span>
-                </div>
+      <main style={{ maxWidth: 960, margin: "0 auto", padding: 32 }}>
+        <h1 style={{ ...pageHeadingStyle, fontSize: "1.5em" }}>
+          My Homes
+        </h1>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          {homes.length === 0 ? (
+            <div style={{ textAlign: "center" }}>
+              <p>You don't have any homes yet.</p>
+              <Link href="/setup" style={{ ...buttonStyle, marginTop: 8 }}>
+                Create your first home
               </Link>
-            ))}
-          </div>
-        )}
+            </div>
+          ) : (
+            <>
+              <Link href="/setup" style={{ ...buttonStyle, padding: "4px 12px" }}>
+                + Create new home
+              </Link>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+                {homes.map((home) => (
+                  <div key={home.id} style={{ border: "1px solid #a2a9b1", padding: 16 }}>
+                    <Link
+                      href={`/wiki/${userEmail}/${home.slug}`}
+                      style={{ color: "#3366cc", textDecoration: "none" }}
+                    >
+                      <strong>{home.name}</strong>
+                    </Link>
+                    <div style={{ fontSize: "0.75em", color: "#54595d", marginTop: 4 }}>
+                      {home._count.pages} pages · {home.homeType} ·{" "}
+                      {home.isPublic ? "Public" : "Private"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
